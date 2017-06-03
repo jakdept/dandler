@@ -12,21 +12,8 @@ import (
 	"testing"
 
 	_ "github.com/jakdept/sp9k1/statik"
-	"github.com/rakyll/statik/fs"
-	"github.com/sebdah/goldie"
 	"github.com/stretchr/testify/assert"
 )
-
-var testFS http.FileSystem
-
-func init() {
-	var err error
-	testFS, err = fs.New()
-	if err != nil {
-		log.Fatalf("Failed to load statik fs, aborting tests: %s", err)
-	}
-	goldie.FixtureDir = "testdata/fixtures"
-}
 
 func TestLoadThumbnail(t *testing.T) {
 	testData := []struct {

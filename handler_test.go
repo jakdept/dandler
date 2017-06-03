@@ -1,7 +1,3 @@
-// built with goldie
-// if golden files in fixture dir are manually verified, you can update with
-// go test -update
-
 package handler
 
 import (
