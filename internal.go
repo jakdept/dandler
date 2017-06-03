@@ -1,6 +1,6 @@
 //go:generate statik -src=./testdata
 
-package handler
+package dandler
 
 import (
 	"fmt"

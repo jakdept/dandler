@@ -2,7 +2,7 @@
 // go get github.com/rakyll/statik
 // go generate
 
-package handler
+package dandler
 
 import (
 	"crypto/md5"
@@ -14,7 +14,7 @@ import (
 	"net/url"
 	"testing"
 
-	_ "github.com/jakdept/handler/statik"
+	_ "github.com/jakdept/dandler/statik"
 	"github.com/rakyll/statik/fs"
 	"github.com/stretchr/testify/assert"
 )
