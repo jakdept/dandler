@@ -1,3 +1,7 @@
+// make sure CI runs the following commands before testing this package
+// go get github.com/rakyll/statik
+// go generate
+
 package handler
 
 import (
@@ -27,8 +31,7 @@ func init() {
 
 func TestInternalHandler(t *testing.T) {
 	// todo: re-enable this test
-	log.Println("internal handler test skipped")
-	t.Skip()
+	t.Skip("internal handler test skipped")
 	var testData = []struct {
 		uri           string
 		code          int

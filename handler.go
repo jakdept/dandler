@@ -1,5 +1,3 @@
-//go:generate statik -src=./static
-
 package handler
 
 import (
