@@ -25,7 +25,7 @@ func IndexHandler(logger *log.Logger, basepath string, done <-chan struct{}, tem
 	tracker, err := dir.Watch(basepath)
 	if err != nil {
 		logger.Printf("failed to watch directory [%s] - %v", basepath, err)
-		return ErrorHandler(500, "failed to initialize IndexHandler - %v", err)
+		return ResponseCodeHandler(500, "failed to initialize IndexHandler - %v", err)
 	}
 	go func() {
 		<-done

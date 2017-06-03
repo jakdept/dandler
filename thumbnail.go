@@ -2,9 +2,7 @@ package handler
 
 import (
 	"fmt"
-	"html/template"
 	"image"
-	"io"
 	"log"
 	"net/http"
 	"os"
@@ -20,7 +18,6 @@ import (
 	"image/jpeg"
 	"image/png"
 
-	"github.com/jakdept/dir"
 	_ "github.com/jakdept/sp9k1/statik"
 	"github.com/nfnt/resize"
 	"github.com/oliamb/cutter"
