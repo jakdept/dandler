@@ -14,24 +14,14 @@ import (
 	"net/url"
 	"testing"
 
-	_ "github.com/jakdept/sp9k1/statik"
+	_ "github.com/jakdept/handlers/statik"
 	"github.com/rakyll/statik/fs"
 	"github.com/stretchr/testify/assert"
 )
 
-var testFS http.FileSystem
-
-func init() {
-	var err error
-	testFS, err = fs.New()
-	if err != nil {
-		log.Fatalf("Failed to load statik fs, aborting tests: %s", err)
-	}
-}
-
 func TestInternalHandler(t *testing.T) {
 	// todo: re-enable this test
-	t.Skip("internal handler test skipped")
+	// t.Skip("internal handler test skipped")
 	var testData = []struct {
 		uri           string
 		code          int
@@ -82,6 +72,11 @@ func TestInternalHandler(t *testing.T) {
 			contentLength: 0,
 			contentType:   "text/html; charset=utf-8",
 		},
+	}
+
+	testFS, err := fs.New()
+	if err != nil {
+		log.Fatalf("Failed to load statik fs, aborting tests: %s", err)
 	}
 
 	logger := log.New(ioutil.Discard, "", 0)
