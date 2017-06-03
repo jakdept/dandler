@@ -14,7 +14,7 @@ import (
 	"net/url"
 	"testing"
 
-	_ "github.com/jakdept/handlers/statik"
+	_ "github.com/jakdept/handler/statik"
 	"github.com/rakyll/statik/fs"
 	"github.com/stretchr/testify/assert"
 )
