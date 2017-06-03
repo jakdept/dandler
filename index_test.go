@@ -17,6 +17,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func init() {
+	goldie.FixtureDir = "testdata/fixtures"
+}
+
 func TestIndexHandler_successful(t *testing.T) {
 	templateString := `{
 	"files":{
