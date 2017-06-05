@@ -158,8 +158,7 @@ func (h canocialHostHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h canocialHostHandler) checkHostAndPort(url url.URL) bool {
-	switch strings.Contains(url.Host, ":") {
-	case true:
+	if strings.Contains(url.Host, ":") {
 		chunks := strings.SplitN(url.Host, ":", 2)
 		if h.options&ForceHost != 0 && chunks[0] != h.host {
 			return true
@@ -167,7 +166,7 @@ func (h canocialHostHandler) checkHostAndPort(url url.URL) bool {
 		if h.options&ForcePort != 0 && chunks[1] != h.port {
 			return true
 		}
-	case false:
+	} else {
 		if h.options&ForceHost != 0 && url.Host != h.host {
 			return true
 		}
@@ -178,9 +177,9 @@ func (h canocialHostHandler) checkHostAndPort(url url.URL) bool {
 func (h canocialHostHandler) checkScheme(url url.URL) bool {
 	switch {
 	case h.options&ForceHTTPS != 0:
-		return url.Scheme == "https"
+		return url.Scheme != "https"
 	case h.options&ForceHTTP != 0:
-		return url.Scheme == "http"
+		return url.Scheme != "http"
 	default:
 		return false
 	}
