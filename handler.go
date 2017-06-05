@@ -5,9 +5,11 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 
 	_ "image/gif"
 	_ "image/jpeg"
@@ -123,4 +125,92 @@ func (h responseCodeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func ResponseCodeHandler(code int, msg string, args ...interface{}) http.Handler {
 	return responseCodeHandler{code: code, msg: fmt.Sprintf(msg, args...)}
+}
+
+type canocialHostHandler struct {
+	host    string
+	port    string
+	options int
+	child   http.Handler
+}
+
+const (
+	ForceHTTP      = 1 << iota // force http as the redirect target
+	ForceHTTPS                 // force https as the redirect target
+	ForceHost                  // force the given hostname as the redirect target
+	ForcePort                  // force a given port for the redirect target
+	ForceTemporary             // Use a 302 for the redirect
+)
+
+func (h canocialHostHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if h.checkHostAndPort(*r.URL) || h.checkScheme(*r.URL) {
+		if h.options&ForceTemporary != 0 {
+			http.Redirect(w, r, h.buildRedirect(*r.URL), http.StatusTemporaryRedirect)
+		} else {
+			http.Redirect(w, r, h.buildRedirect(*r.URL), http.StatusPermanentRedirect)
+		}
+
+	}
+}
+
+func (h canocialHostHandler) checkHostAndPort(url url.URL) bool {
+	switch strings.Contains(url.Host, ":") {
+	case true:
+		chunks := strings.SplitN(url.Host, ":", 2)
+		if h.options&ForceHost != 0 && chunks[0] != h.host {
+			return true
+		}
+		if h.options&ForcePort != 0 && chunks[1] != h.port {
+			return true
+		}
+	case false:
+		if h.options&ForceHost != 0 && url.Host != h.host {
+			return true
+		}
+	}
+	return false
+}
+
+func (h canocialHostHandler) checkScheme(url url.URL) bool {
+	switch {
+	case h.options&ForceHTTPS != 0:
+		return url.Scheme == "https"
+	case h.options&ForceHTTP != 0:
+		return url.Scheme == "http"
+	default:
+		return false
+	}
+}
+
+func (h canocialHostHandler) buildRedirect(url url.URL) string {
+	// if host or port is forced, I have to modify the host header
+	if h.options&(ForceHost|ForcePort) != 0 {
+		if strings.Contains(url.Host, ":") {
+			chunks := strings.SplitN(url.Host, ":", 2)
+			if h.options&ForceHost != 0 {
+				chunks[0] = h.host
+			}
+			if h.options&ForcePort != 0 {
+				chunks[1] = h.port
+			}
+			url.Host = chunks[0] + ":" + chunks[1]
+		} else {
+			// if there was no colon in the port before, there does not need to be after
+			if h.options&ForceHost != 0 {
+				url.Host = h.host
+			}
+		}
+	}
+
+	// if forcing http, change it now
+	if h.options&ForceHTTP != 0 {
+		url.Scheme = "http"
+	}
+
+	// if forcing https, change it now
+	if h.options&ForceHTTPS != 0 {
+		url.Scheme = "https"
+	}
+
+	return url.String()
 }
