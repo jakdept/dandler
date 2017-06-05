@@ -185,20 +185,23 @@ func (h canocialHostHandler) checkScheme(url url.URL) bool {
 func (h canocialHostHandler) buildRedirect(url url.URL) string {
 	// if host or port is forced, I have to modify the host header
 	if h.options&(ForceHost|ForcePort) != 0 {
+		var host, port string
 		if strings.Contains(url.Host, ":") {
 			chunks := strings.SplitN(url.Host, ":", 2)
-			if h.options&ForceHost != 0 {
-				chunks[0] = h.host
-			}
-			if h.options&ForcePort != 0 {
-				chunks[1] = h.port
-			}
-			url.Host = chunks[0] + ":" + chunks[1]
+			host, port = chunks[0], chunks[1]
 		} else {
-			// if there was no colon in the port before, there does not need to be after
-			if h.options&ForceHost != 0 {
-				url.Host = h.host
-			}
+			host = url.Host
+		}
+		if h.options&ForceHost != 0 {
+			host = h.host
+		}
+		if h.options&ForcePort != 0 {
+			port = h.port
+		}
+		if port == "" {
+			url.Host = host
+		} else {
+			url.Host = host + ":" + port
 		}
 	}
 
