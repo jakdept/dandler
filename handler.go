@@ -142,6 +142,10 @@ const (
 	ForceTemporary             // Use a 302 for the redirect
 )
 
+func CanocialHostHandler(host, port string, options int, childHandler http.Handler) http.Handler {
+	return canocialHostHandler{host: host, port: port, options: options, child: childHandler}
+}
+
 func (h canocialHostHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if h.checkHostAndPort(*r.URL) || h.checkScheme(*r.URL) {
 		if h.options&ForceTemporary != 0 {
@@ -149,8 +153,8 @@ func (h canocialHostHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		} else {
 			http.Redirect(w, r, h.buildRedirect(*r.URL), http.StatusPermanentRedirect)
 		}
-
 	}
+	h.child.ServeHTTP(w, r)
 }
 
 func (h canocialHostHandler) checkHostAndPort(url url.URL) bool {
