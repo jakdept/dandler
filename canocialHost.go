@@ -2,8 +2,8 @@ package dandler
 
 import (
 	"crypto/tls"
+	"fmt"
 	"net/http"
-	"net/url"
 	"strings"
 )
 
@@ -29,9 +29,9 @@ func CanocialHostHandler(host, port string, options int, childHandler http.Handl
 func (h canocialHostHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if h.checkHostAndPort(r.Host) || h.checkScheme(r.TLS) {
 		if h.options&ForceTemporary != 0 {
-			http.Redirect(w, r, h.buildRedirect(*r.URL), http.StatusTemporaryRedirect)
+			http.Redirect(w, r, h.buildRedirect(r), http.StatusTemporaryRedirect)
 		} else {
-			http.Redirect(w, r, h.buildRedirect(*r.URL), http.StatusPermanentRedirect)
+			http.Redirect(w, r, h.buildRedirect(r), http.StatusPermanentRedirect)
 		}
 	}
 	h.child.ServeHTTP(w, r)
@@ -65,38 +65,40 @@ func (h canocialHostHandler) checkScheme(conn *tls.ConnectionState) bool {
 	}
 }
 
-func (h canocialHostHandler) buildRedirect(url url.URL) string {
+func (h canocialHostHandler) buildRedirect(r *http.Request) string {
 	// if host or port is forced, I have to modify the host header
+	var host, port, scheme string
 	if h.options&(ForceHost|ForcePort) != 0 {
-		var host, port string
-		if strings.Contains(url.Host, ":") {
-			chunks := strings.SplitN(url.Host, ":", 2)
+		if strings.Contains(r.Host, ":") {
+			chunks := strings.SplitN(r.Host, ":", 2)
 			host, port = chunks[0], chunks[1]
 		} else {
-			host = url.Host
-		}
-		if h.options&ForceHost != 0 {
-			host = h.host
-		}
-		if h.options&ForcePort != 0 {
-			port = h.port
-		}
-		if port == "" {
-			url.Host = host
-		} else {
-			url.Host = host + ":" + port
+			host = r.Host
 		}
 	}
 
-	// if forcing http, change it now
+	if r.TLS == nil {
+		scheme = "http"
+	} else {
+		scheme = "https"
+	}
+
+	// if forcing certain options, change them now
+	if h.options&ForceHost != 0 {
+		host = h.host
+	}
+	if h.options&ForcePort != 0 {
+		port = h.port
+	}
 	if h.options&ForceHTTP != 0 {
-		url.Scheme = "http"
+		scheme = "http"
 	}
-
-	// if forcing https, change it now
 	if h.options&ForceHTTPS != 0 {
-		url.Scheme = "https"
+		scheme = "https"
 	}
 
-	return url.String()
+	if port == "" {
+		return fmt.Sprintf("%s://%s/%s", scheme, host, r.RequestURI)
+	}
+	return fmt.Sprintf("%s://%s:%s/%s", scheme, host, port, r.RequestURI)
 }

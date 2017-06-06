@@ -100,7 +100,7 @@ func TestCanocialHostHandler(t *testing.T) {
 
 	for id, test := range testdata {
 		t.Run(fmt.Sprintf("canocial test %d", id), func(t *testing.T) {
-			// t.Parallel()
+			t.Parallel()
 
 			c := http.Client{
 				CheckRedirect: func(req *http.Request, via []*http.Request) error {
@@ -113,9 +113,7 @@ func TestCanocialHostHandler(t *testing.T) {
 			resp, err := c.Get(ts.URL)
 			assert.Nil(t, err)
 
-			fmt.Printf("test #%d [%d] [%s]\n%#v\n\n", id, resp.StatusCode, ts.URL, resp)
-
-			// verify teh response code
+			// verify the response code
 			assert.Equal(t, test.expectedStatus, resp.StatusCode)
 
 			// if it's a redirect, check the stuff
