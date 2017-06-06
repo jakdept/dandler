@@ -14,7 +14,7 @@ type canocialHostHandler struct {
 	child   http.Handler
 }
 
-// The following constants are to be used with the Canocial Host Handler.
+// These constants are to be used with the Canocial Host Handler.
 const (
 	ForceHTTP      = 1 << iota // force http as the redirect target
 	ForceHTTPS                 // force https as the redirect target

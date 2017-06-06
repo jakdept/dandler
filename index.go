@@ -33,6 +33,7 @@ func IndexHandler(logger *log.Logger, basepath string, done <-chan struct{}, tem
 	return indexHandler{basePath: basepath, templ: templ, l: logger, dir: tracker, done: done}
 }
 
+// This is the struct passed to the template used with an IndexHandler
 type IndexData struct {
 	Files []string
 	Dirs  []string
