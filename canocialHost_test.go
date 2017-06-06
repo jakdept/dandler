@@ -100,7 +100,7 @@ func TestCanocialHostHandler(t *testing.T) {
 
 	for id, test := range testdata {
 		t.Run(fmt.Sprintf("canocial test %d", id), func(t *testing.T) {
-			t.Parallel()
+			// t.Parallel()
 
 			c := http.Client{
 				CheckRedirect: func(req *http.Request, via []*http.Request) error {
