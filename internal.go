@@ -7,15 +7,11 @@ import (
 	"log"
 	"net/http"
 	"path"
-
-	_ "image/gif"
-	_ "image/jpeg"
-	_ "image/png"
-
-	_ "github.com/jakdept/sp9k1/statik"
 )
 
-// InternalHandler serves a static, in memory filesystem..
+// InternalHandler serves a static, in memory filesystem. The filesystem to be
+// served should have been generated with github.com/rakyll/statik. It should
+// also be imported directly into the current package.
 func InternalHandler(logger *log.Logger, fs http.FileSystem) http.Handler {
 	return internalHandler{handler: http.FileServer(fs), l: logger}
 }

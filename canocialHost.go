@@ -14,6 +14,7 @@ type canocialHostHandler struct {
 	child   http.Handler
 }
 
+// The following constants are to be used with the Canocial Host Handler.
 const (
 	ForceHTTP      = 1 << iota // force http as the redirect target
 	ForceHTTPS                 // force https as the redirect target
@@ -22,6 +23,9 @@ const (
 	ForceTemporary             // Use a 302 for the redirect
 )
 
+// CanocialHostHandler returns a http.Handler that redirects to the canocial host
+// based on certain options. 0 may be passed for options if so desired, or provided
+// bits can be forced on the client with a redirect.
 func CanocialHostHandler(host, port string, options int, childHandler http.Handler) http.Handler {
 	return canocialHostHandler{host: host, port: port, options: options, child: childHandler}
 }

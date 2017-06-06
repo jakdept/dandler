@@ -11,19 +11,22 @@ import (
 	"strings"
 	"time"
 
-	_ "image/gif"
-	_ "image/jpeg"
-	_ "image/png"
+	_ "image/gif"  // imported to allow gif decoding natively
+	_ "image/jpeg" // imported to allow jpeg decoding
+	_ "image/png"  // imported to allow png decoding
 
 	"image/jpeg"
 	"image/png"
 
-	_ "github.com/jakdept/sp9k1/statik"
 	"github.com/nfnt/resize"
 	"github.com/oliamb/cutter"
 	"github.com/traherom/memstream"
 )
 
+// ThumbnailHandler returns a handler that generates a thumbnail of the given
+// size of each image, stores it in the specified location, and serves back the
+// thumbnails upon request. Thumbnails are generated when needed. File caching
+// is used to decrease thumbnail generation.
 func ThumbnailHandler(logger *log.Logger, targetWidth, targetHeight int,
 	rawImageDirectory, thumbnailDirectory, thumbnailExtension string) http.Handler {
 	return thumbnailHandler{
