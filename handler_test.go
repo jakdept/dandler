@@ -10,7 +10,6 @@ import (
 	"net/url"
 	"testing"
 
-	_ "github.com/jakdept/sp9k1/statik"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -200,7 +199,7 @@ func TestSplitHandler(t *testing.T) {
 }
 
 func TestDirSplitHandler(t *testing.T) {
-	testData := []struct {
+	testdata := []struct {
 		uri  string
 		code int
 	}{
@@ -227,7 +226,7 @@ func TestDirSplitHandler(t *testing.T) {
 		t.Fatalf("failed to parse url: %s", err)
 	}
 
-	for testID, test := range testData {
+	for testID, test := range testdata {
 		t.Run(fmt.Sprintf("TestContentTypeHandle #%d - [%s]", testID, test.uri), func(t *testing.T) {
 			uri, err := url.Parse(test.uri)
 			if err != nil {

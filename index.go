@@ -10,12 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	_ "image/gif"
-	_ "image/jpeg"
-	_ "image/png"
-
 	"github.com/jakdept/dir"
-	_ "github.com/jakdept/sp9k1/statik"
 )
 
 // IndexHandler lists all files in a directory, and passes them to template execution to build a directory listing.
@@ -33,6 +28,7 @@ func IndexHandler(logger *log.Logger, basepath string, done <-chan struct{}, tem
 	return indexHandler{basePath: basepath, templ: templ, l: logger, dir: tracker, done: done}
 }
 
+// This is the struct passed to the template used with an IndexHandler
 type IndexData struct {
 	Files []string
 	Dirs  []string

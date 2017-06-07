@@ -11,7 +11,6 @@ import (
 	"os"
 	"testing"
 
-	_ "github.com/jakdept/sp9k1/statik"
 	"github.com/stretchr/testify/assert"
 )
 
