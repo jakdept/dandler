@@ -12,7 +12,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	_ "github.com/jakdept/sp9k1/statik"
 	"github.com/sebdah/goldie"
 	"github.com/stretchr/testify/assert"
 )

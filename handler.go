@@ -9,12 +9,7 @@ import (
 	"path"
 	"path/filepath"
 
-	_ "image/gif"
-	_ "image/jpeg"
-	_ "image/png"
-
 	"github.com/jakdept/dir"
-	_ "github.com/jakdept/sp9k1/statik"
 )
 
 // SplitHandler allows the routing of one handler at /, and another at all locations below /.

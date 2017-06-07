@@ -10,12 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	_ "image/gif"
-	_ "image/jpeg"
-	_ "image/png"
-
 	"github.com/jakdept/dir"
-	_ "github.com/jakdept/sp9k1/statik"
 )
 
 // IndexHandler lists all files in a directory, and passes them to template execution to build a directory listing.
