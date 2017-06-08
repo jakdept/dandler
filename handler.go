@@ -138,19 +138,3 @@ func (h successHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func Success(msg string) http.Handler {
 	return successHandler{msg: msg}
 }
-
-// Header returns a handler that adds the given handler to the response.
-func Header(name, msg string, handler http.Handler) http.Handler {
-	return headerHandler{key: name, value: msg, child: handler}
-}
-
-type headerHandler struct {
-	key   string
-	value string
-	child http.Handler
-}
-
-func (h headerHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add(h.key, h.value)
-	h.child.ServeHTTP(w, r)
-}
