@@ -9,10 +9,10 @@ import (
 	"path"
 )
 
-// InternalHandler serves a static, in memory filesystem. The filesystem to be
+// Internal serves a static, in memory filesystem. The filesystem to be
 // served should have been generated with github.com/rakyll/statik. It should
 // also be imported directly into the current package.
-func InternalHandler(logger *log.Logger, fs http.FileSystem) http.Handler {
+func Internal(logger *log.Logger, fs http.FileSystem) http.Handler {
 	return internalHandler{handler: http.FileServer(fs), l: logger}
 }
 

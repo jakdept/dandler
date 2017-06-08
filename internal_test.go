@@ -19,7 +19,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestInternalHandler(t *testing.T) {
+func TestInternal(t *testing.T) {
 	// todo: re-enable this test
 	// t.Skip("internal handler test skipped")
 	var testData = []struct {
@@ -80,7 +80,7 @@ func TestInternalHandler(t *testing.T) {
 	}
 
 	logger := log.New(ioutil.Discard, "", 0)
-	ts := httptest.NewServer(InternalHandler(logger, testFS))
+	ts := httptest.NewServer(Internal(logger, testFS))
 	defer ts.Close()
 
 	baseURL, err := url.Parse(ts.URL)
@@ -89,7 +89,7 @@ func TestInternalHandler(t *testing.T) {
 	}
 
 	for testID, test := range testData {
-		t.Run(fmt.Sprintf("TestInternalHandler #%d - [%s]", testID, test.uri), func(t *testing.T) {
+		t.Run(fmt.Sprintf("TestInternal #%d - [%s]", testID, test.uri), func(t *testing.T) {
 			uri, err := url.Parse(test.uri)
 			if err != nil {
 				t.Errorf("bad URI path: [%s]", test.uri)

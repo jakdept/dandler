@@ -61,7 +61,7 @@ func TestLoadThumbnail(t *testing.T) {
 	}
 }
 
-func TestThumbnailHandler(t *testing.T) {
+func TestThumbnail(t *testing.T) {
 	var testData = []struct {
 		uri           string
 		code          int
@@ -138,7 +138,7 @@ func TestThumbnailHandler(t *testing.T) {
 	}
 
 	logger := log.New(ioutil.Discard, "", 0)
-	ts := httptest.NewServer(ThumbnailHandler(logger, 300, 250, "./testdata/", tempdir, "png"))
+	ts := httptest.NewServer(Thumbnail(logger, 300, 250, "./testdata/", tempdir, "png"))
 	defer ts.Close()
 
 	baseURL, err := url.Parse(ts.URL)
@@ -147,7 +147,7 @@ func TestThumbnailHandler(t *testing.T) {
 	}
 
 	for testID, test := range testData {
-		t.Run(fmt.Sprintf("TestThumbnailHandler-#%d[%s][tempdir:%s]", testID, test.uri, tempdir), func(t *testing.T) {
+		t.Run(fmt.Sprintf("TestThumbnail-#%d[%s][tempdir:%s]", testID, test.uri, tempdir), func(t *testing.T) {
 			uri, err := url.Parse(test.uri)
 			if err != nil {
 				t.Errorf("bad URI path: [%s]", test.uri)
@@ -181,7 +181,7 @@ func TestThumbnailHandler(t *testing.T) {
 	}
 }
 
-func TestThumbnailHandlerJPG(t *testing.T) {
+func TestThumbnailJPG(t *testing.T) {
 	var testData = []struct {
 		uri           string
 		code          int
@@ -259,7 +259,7 @@ func TestThumbnailHandlerJPG(t *testing.T) {
 		}
 
 		logger := log.New(ioutil.Discard, "", 0)
-		ts := httptest.NewServer(ThumbnailHandler(logger, 300, 250, "./testdata/", tempdir, ext))
+		ts := httptest.NewServer(Thumbnail(logger, 300, 250, "./testdata/", tempdir, ext))
 		defer ts.Close()
 
 		baseURL, err := url.Parse(ts.URL)
@@ -268,7 +268,7 @@ func TestThumbnailHandlerJPG(t *testing.T) {
 		}
 
 		for testID, test := range testData {
-			t.Run(fmt.Sprintf("TestThumbnailHandler[%s]-#%d-[%s]-[tempdir:%s]", ext, testID, test.uri, tempdir), func(t *testing.T) {
+			t.Run(fmt.Sprintf("TestThumbnail[%s]-#%d-[%s]-[tempdir:%s]", ext, testID, test.uri, tempdir), func(t *testing.T) {
 				uri, err := url.Parse(test.uri + "." + ext)
 				if err != nil {
 					t.Errorf("bad URI path: [%s]", test.uri)

@@ -12,8 +12,8 @@ import (
 	"github.com/jakdept/dir"
 )
 
-// SplitHandler allows the routing of one handler at /, and another at all locations below /.
-func SplitHandler(root, more http.Handler) http.Handler {
+// Split allows the routing of one handler at /, and another at all locations below /.
+func Split(root, more http.Handler) http.Handler {
 	return splitHandler{bare: root, more: more}
 }
 
@@ -30,11 +30,11 @@ func (p splitHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// DirSplitHandler takes two child handlers - one for the directories, one for
+// DirSplit takes two child handlers - one for the directories, one for
 // the other locations. It then watches a directory - and sub directories - and
 // any request that would match a directory relative to that path is routed to
 // the handler for directories. All other requests are routed to the other handler.
-func DirSplitHandler(logger *log.Logger, basepath string, done <-chan struct{}, folder, other http.Handler) http.Handler {
+func DirSplit(logger *log.Logger, basepath string, done <-chan struct{}, folder, other http.Handler) http.Handler {
 	tracker, err := dir.Watch(basepath)
 	if err != nil {
 		log.Fatalf("failed to watch directory [%s] - %v", basepath, err)
@@ -61,9 +61,9 @@ func (h dirSplitHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// ContentTypeHandler serves a given file back to the requester, and determines content type by algorithm only.
+// ContentType serves a given file back to the requester, and determines content type by algorithm only.
 // It does not use the file's extension to determine the content type.
-func ContentTypeHandler(logger *log.Logger, basePath string) http.Handler {
+func ContentType(logger *log.Logger, basePath string) http.Handler {
 	return contentTypeHandler{basePath: basePath, l: logger}
 }
 
@@ -120,8 +120,8 @@ func (h responseCodeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, h.msg, h.code)
 }
 
-// ResponseCodeHandler responds with an error to any request with the error code and message provided.
-func ResponseCodeHandler(code int, msg string, args ...interface{}) http.Handler {
+// ResponseCode responds with an error to any request with the error code and message provided.
+func ResponseCode(code int, msg string, args ...interface{}) http.Handler {
 	return responseCodeHandler{code: code, msg: fmt.Sprintf(msg, args...)}
 }
 
@@ -133,13 +133,14 @@ func (h successHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(h.msg))
 }
 
-// SuccessHandler returns a handler that responds to every request with a 200 and
+// Success returns a handler that responds to every request with a 200 and
 // always the same message.
-func SuccessHandler(msg string) http.Handler {
+func Success(msg string) http.Handler {
 	return successHandler{msg: msg}
 }
 
-func HeaderHandler(name, msg string, handler http.Handler) http.Handler {
+// Header returns a handler that adds the given handler to the response.
+func Header(name, msg string, handler http.Handler) http.Handler {
 	return headerHandler{key: name, value: msg, child: handler}
 }
 

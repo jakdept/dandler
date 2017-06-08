@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCanocialHostHandler(t *testing.T) {
+func TestCanocialHost(t *testing.T) {
 	testdata := []struct {
 		options        int
 		host           string
@@ -96,7 +96,7 @@ func TestCanocialHostHandler(t *testing.T) {
 		},
 	}
 
-	child := SuccessHandler("child")
+	child := Success("child")
 
 	for id, test := range testdata {
 		t.Run(fmt.Sprintf("canocial test %d", id), func(t *testing.T) {
@@ -109,7 +109,7 @@ func TestCanocialHostHandler(t *testing.T) {
 			}
 
 			// create the server for the parallel test
-			ts := httptest.NewServer(CanocialHostHandler(test.host, test.port, test.options, child))
+			ts := httptest.NewServer(CanocialHost(test.host, test.port, test.options, child))
 			resp, err := c.Get(ts.URL)
 			assert.Nil(t, err)
 

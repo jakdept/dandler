@@ -13,12 +13,12 @@ import (
 	"github.com/jakdept/dir"
 )
 
-// IndexHandler lists all files in a directory, and passes them to template execution to build a directory listing.
-func IndexHandler(logger *log.Logger, basepath string, done <-chan struct{}, templ *template.Template) http.Handler {
+// Index lists all files in a directory, and passes them to template execution to build a directory listing.
+func Index(logger *log.Logger, basepath string, done <-chan struct{}, templ *template.Template) http.Handler {
 	tracker, err := dir.Watch(basepath)
 	if err != nil {
 		logger.Printf("failed to watch directory [%s] - %v", basepath, err)
-		return ResponseCodeHandler(500, "failed to initialize IndexHandler - %v", err)
+		return ResponseCode(500, "failed to initialize IndexHandler - %v", err)
 	}
 	go func() {
 		<-done

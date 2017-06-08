@@ -20,7 +20,7 @@ func init() {
 	goldie.FixtureDir = "testdata/fixtures"
 }
 
-func TestIndexHandler_successful(t *testing.T) {
+func TestIndex_successful(t *testing.T) {
 	templateString := `{
 	"files":{
 		{{ range $index, $value := .Files -}}
@@ -44,7 +44,7 @@ func TestIndexHandler_successful(t *testing.T) {
 	defer close(done)
 
 	logger := log.New(ioutil.Discard, "", 0)
-	ts := httptest.NewServer(IndexHandler(logger, "testdata/sample_images", done, testTempl))
+	ts := httptest.NewServer(Index(logger, "testdata/sample_images", done, testTempl))
 	defer ts.Close()
 
 	res, err := http.Get(ts.URL)
@@ -62,7 +62,7 @@ func TestIndexHandler_successful(t *testing.T) {
 }
 
 // test to make sure a bad folder kicks a 404
-func TestIndexHandler_badpath(t *testing.T) {
+func TestIndex_badpath(t *testing.T) {
 	templateString := ""
 	testTempl := template.Must(template.New("test").Parse(templateString))
 
@@ -70,7 +70,7 @@ func TestIndexHandler_badpath(t *testing.T) {
 	defer close(done)
 
 	logger := log.New(ioutil.Discard, "", 0)
-	ts := httptest.NewServer(IndexHandler(logger, "not-a-folder", done, testTempl))
+	ts := httptest.NewServer(Index(logger, "not-a-folder", done, testTempl))
 	defer ts.Close()
 
 	res, err := http.Get(ts.URL)
@@ -82,7 +82,7 @@ func TestIndexHandler_badpath(t *testing.T) {
 }
 
 // test to make sure that a bad template kicks a 500
-func TestIndexHandler_badtemplate(t *testing.T) {
+func TestIndex_badtemplate(t *testing.T) {
 	templateString := "{{ .ValueNotPresent }}"
 	testTempl := template.Must(template.New("test").Parse(templateString))
 
@@ -90,7 +90,7 @@ func TestIndexHandler_badtemplate(t *testing.T) {
 	defer close(done)
 
 	logger := log.New(ioutil.Discard, "", 0)
-	ts := httptest.NewServer(IndexHandler(logger, "testdata", done, testTempl))
+	ts := httptest.NewServer(Index(logger, "testdata", done, testTempl))
 	defer ts.Close()
 
 	res, err := http.Get(ts.URL)
