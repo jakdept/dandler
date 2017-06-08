@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"path"
-	"strings"
 )
 
 // Internal serves a static, in memory filesystem. The filesystem to be
