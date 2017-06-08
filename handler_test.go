@@ -247,3 +247,11 @@ func TestDirSplitHandler(t *testing.T) {
 		})
 	}
 }
+
+func TestHeaderHandler(t *testing.T) {
+	ts := httptest.NewServer(HeaderHandler("superheader", "secret value", SuccessHandler("yay")))
+
+	resp, err := http.Get(ts.URL)
+	assert.Nil(t, err)
+	assert.Equal(t, "secret value", resp.Header.Get("superheader"))
+}
