@@ -2,7 +2,6 @@ package dandler
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -21,6 +20,10 @@ func TestHeader(t *testing.T) {
 }
 
 func TestASCIIHeader(t *testing.T) {
+	// this test may fail if the sun shines the wrong way. Really it's a crapshoot.
+	if testing.Short() {
+		t.Skip("skipping a finicky test")
+	}
 	handler := Success("hello gopher")
 	handler = ASCIIHeader("gopher\ngolang\ngo", GolangGopherASCII, "+", handler)
 	ts := httptest.NewServer(handler)
@@ -33,9 +36,21 @@ func TestASCIIHeader(t *testing.T) {
 	defer resp.Body.Close()
 
 	var headerMap []string
-	for key, value := range resp.Header {
-		headerMap = append(headerMap, fmt.Sprintf("%s:%s", key, value))
+	for i := 0; i < len(resp.Header["Gopher"]) ||
+		i < len(resp.Header["Golang"]) || i < len(resp.Header["Go++++"]); i++ {
+		if i < len(resp.Header["Gopher"]) {
+			headerMap = append(headerMap, resp.Header["Gopher"][i])
+		}
+		if i < len(resp.Header["Golang"]) {
+			headerMap = append(headerMap, resp.Header["Golang"][i])
+		}
+		if i < len(resp.Header["Go++++"]) {
+			headerMap = append(headerMap, resp.Header["Go++++"][i])
+		}
 	}
 
-	log.Println(strings.Join(headerMap, "++\n"))
+	rebuilt := strings.Join(headerMap, "\n")
+
+	fmt.Println(rebuilt)
+	assert.Equal(t, strings.TrimSpace(GolangGopherASCII), rebuilt)
 }
