@@ -1,7 +1,6 @@
 package dandler
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/jakdept/drings"
@@ -38,9 +37,7 @@ func ASCIIHeader(key, value, padChar string, child http.Handler) http.Handler {
 	width := drings.MaxLen(keyArr)
 	keyArr = drings.PadAllRight(keyArr, padChar, width)
 
-	valueArr := drings.SplitAndTrimSpace(key, "\n")
-
-	log.Println("returning handler")
+	valueArr := drings.SplitAndTrimSpace(value, "\n")
 
 	return asciiHeaderHandler{key: keyArr, value: valueArr, child: child}
 }
@@ -52,20 +49,20 @@ type asciiHeaderHandler struct {
 }
 
 func (h asciiHeaderHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	for keyCount, valueCount := 0, 0; valueCount < len(h.value); {
-		keyCount++
-		valueCount++
+	keyCount, valueCount := 0, 0
+	for valueCount < len(h.value) {
 		if keyCount >= len(h.key) {
 			keyCount = 0
 		}
 		w.Header().Add(h.key[keyCount], h.value[valueCount])
-		log.Printf("%d : %s", valueCount, h.value[valueCount])
+		keyCount++
+		valueCount++
 	}
 	h.child.ServeHTTP(w, r)
 }
 
 // GolangGopherASCII is a ascii drawing of a golang gopher for use in ASCIIHeader()
-var GolangGopherASCII = `
+const GolangGopherASCII = `
 '______________________________________________________________________________
 /                                                                              \
 |                                                                              |
