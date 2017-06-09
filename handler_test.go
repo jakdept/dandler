@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestContentTypeHandler(t *testing.T) {
+func TestContentType(t *testing.T) {
 	var testData = []struct {
 		uri           string
 		code          int
@@ -104,7 +104,7 @@ func TestContentTypeHandler(t *testing.T) {
 	}
 
 	logger := log.New(ioutil.Discard, "", 0)
-	ts := httptest.NewServer(ContentTypeHandler(logger, "./testdata/"))
+	ts := httptest.NewServer(ContentType(logger, "./testdata/"))
 	defer ts.Close()
 
 	baseURL, err := url.Parse(ts.URL)
@@ -148,14 +148,7 @@ func TestContentTypeHandler(t *testing.T) {
 	}
 }
 
-// handler will always response with 200 ok and the given body
-func foundHandler() http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "ohai mr client")
-	})
-}
-
-func TestSplitHandler(t *testing.T) {
+func TestSplit(t *testing.T) {
 	testData := []struct {
 		uri  string
 		code int
@@ -168,7 +161,7 @@ func TestSplitHandler(t *testing.T) {
 	}
 
 	// setup a handler that returns one thing on the main path, and another on other paths
-	ts := httptest.NewServer(SplitHandler(foundHandler(), http.NotFoundHandler()))
+	ts := httptest.NewServer(Split(Success("ohai mr client"), http.NotFoundHandler()))
 	defer ts.Close()
 
 	baseURL, err := url.Parse(ts.URL)
@@ -198,7 +191,7 @@ func TestSplitHandler(t *testing.T) {
 	}
 }
 
-func TestDirSplitHandler(t *testing.T) {
+func TestDirSplit(t *testing.T) {
 	testdata := []struct {
 		uri  string
 		code int
@@ -217,8 +210,8 @@ func TestDirSplitHandler(t *testing.T) {
 	done := make(chan struct{})
 	defer close(done)
 	logger := log.New(ioutil.Discard, "", 0)
-	ts := httptest.NewServer(DirSplitHandler(logger, "testdata/sample_images", done,
-		foundHandler(), http.NotFoundHandler()))
+	ts := httptest.NewServer(DirSplit(logger, "testdata/sample_images", done,
+		Success("ohai mr client"), http.NotFoundHandler()))
 	defer ts.Close()
 
 	baseURL, err := url.Parse(ts.URL)
@@ -246,12 +239,4 @@ func TestDirSplitHandler(t *testing.T) {
 			assert.Equal(t, test.code, res.StatusCode, "#%d - not routed properly", testID)
 		})
 	}
-}
-
-func TestHeaderHandler(t *testing.T) {
-	ts := httptest.NewServer(HeaderHandler("superheader", "secret value", SuccessHandler("yay")))
-
-	resp, err := http.Get(ts.URL)
-	assert.Nil(t, err)
-	assert.Equal(t, "secret value", resp.Header.Get("superheader"))
 }

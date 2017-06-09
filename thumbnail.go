@@ -23,11 +23,11 @@ import (
 	"github.com/traherom/memstream"
 )
 
-// ThumbnailHandler returns a handler that generates a thumbnail of the given
+// Thumbnail returns a handler that generates a thumbnail of the given
 // size of each image, stores it in the specified location, and serves back the
 // thumbnails upon request. Thumbnails are generated when needed. File caching
 // is used to decrease thumbnail generation.
-func ThumbnailHandler(logger *log.Logger, targetWidth, targetHeight int,
+func Thumbnail(logger *log.Logger, targetWidth, targetHeight int,
 	rawImageDirectory, thumbnailDirectory, thumbnailExtension string) http.Handler {
 	return thumbnailHandler{
 		x:        targetWidth,

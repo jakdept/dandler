@@ -23,10 +23,10 @@ const (
 	ForceTemporary             // Use a 302 for the redirect
 )
 
-// CanocialHostHandler returns a http.Handler that redirects to the canocial host
+// CanocialHost returns a http.Handler that redirects to the canocial host
 // based on certain options. 0 may be passed for options if so desired, or provided
 // bits can be forced on the client with a redirect.
-func CanocialHostHandler(host, port string, options int, childHandler http.Handler) http.Handler {
+func CanocialHost(host, port string, options int, childHandler http.Handler) http.Handler {
 	return canocialHostHandler{host: host, port: port, options: options, child: childHandler}
 }
 
