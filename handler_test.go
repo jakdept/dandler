@@ -8,7 +8,11 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strconv"
+	"strings"
 	"testing"
+
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -237,6 +241,59 @@ func TestDirSplit(t *testing.T) {
 			}
 
 			assert.Equal(t, test.code, res.StatusCode, "#%d - not routed properly", testID)
+		})
+	}
+}
+
+func TestExpires(t *testing.T) {
+	testdata := []struct {
+		min         time.Duration
+		max         time.Duration
+		minExpected int
+		maxExpected int
+	}{
+		{
+			min:         time.Hour * 24 * 30,
+			max:         0,
+			minExpected: 2592000,
+			maxExpected: 2592000,
+		}, {
+			min:         time.Hour * 24 * 30,
+			max:         time.Hour * 24 * 30,
+			minExpected: 2592000,
+			maxExpected: 2592000,
+		}, {
+			min:         time.Hour * 24 * 7,
+			max:         time.Hour * 24 * 30,
+			minExpected: 604800,
+			maxExpected: 2592000,
+		},
+	}
+
+	for id, test := range testdata {
+		t.Run(fmt.Sprintf("TestExpires #%d", id), func(t *testing.T) {
+			handler := Success("yay testing!")
+			switch test.max {
+			case 0:
+				handler = Expires(test.min, handler)
+			default:
+				handler = ExpiresRange(test.min, test.max, handler)
+			}
+
+			ts := httptest.NewServer(handler)
+
+			resp, err := http.Get(ts.URL)
+			assert.NoError(t, err)
+
+			header := resp.Header.Get("Cache-control")
+			strNum := strings.TrimPrefix(header, "max-age=")
+			n, err := strconv.Atoi(strNum)
+			assert.NoError(t, err)
+
+			if n < test.minExpected || n > test.maxExpected {
+				t.Fail()
+				log.Printf("header out of range [%d - %d] - got [%d]", test.min, test.max, n)
+			}
 		})
 	}
 }

@@ -148,12 +148,12 @@ type expiresHandler struct {
 }
 
 func (h expiresHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	duration := h.minCache
+	duration := int(h.minCache.Seconds())
 	if h.maxLength > 0 {
-		duration += time.Duration(rand.Int63n(int64(h.maxLength)))
+		duration += rand.Intn(int(h.maxLength.Seconds()))
 	}
 
-	w.Header().Set("Cache-Control", fmt.Sprintf("max-age=%s", duration))
+	w.Header().Set("Cache-Control", fmt.Sprintf("max-age=%d", duration))
 
 	h.child.ServeHTTP(w, r)
 }
@@ -162,6 +162,6 @@ func Expires(maxAge time.Duration, child http.Handler) http.Handler {
 	return expiresHandler{minCache: maxAge, maxLength: 0, child: child}
 }
 
-func VariableExpires(min, max time.Duration, child http.Handler) http.Handler {
+func ExpiresRange(min, max time.Duration, child http.Handler) http.Handler {
 	return expiresHandler{minCache: min, maxLength: max - min, child: child}
 }
