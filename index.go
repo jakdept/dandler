@@ -14,6 +14,7 @@ import (
 )
 
 // Index lists all files in a directory, and passes them to template execution to build a directory listing.
+// It also creates a list of directories and passes those - but symlinks to directories are not handled.
 func Index(logger *log.Logger, basepath string, done <-chan struct{}, templ *template.Template) http.Handler {
 	tracker, err := dir.Watch(basepath)
 	if err != nil {
