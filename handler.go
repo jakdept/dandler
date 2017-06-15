@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"path"
 	"path/filepath"
+	"time"
 
 	"github.com/jakdept/dir"
 )
@@ -137,4 +139,29 @@ func (h successHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // always the same message.
 func Success(msg string) http.Handler {
 	return successHandler{msg: msg}
+}
+
+type expiresHandler struct {
+	minCache  time.Duration
+	maxLength time.Duration
+	child     http.Handler
+}
+
+func (h expiresHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	duration := int(h.minCache.Seconds())
+	if h.maxLength > 0 {
+		duration += rand.Intn(int(h.maxLength.Seconds()))
+	}
+
+	w.Header().Set("Cache-Control", fmt.Sprintf("max-age=%d", duration))
+
+	h.child.ServeHTTP(w, r)
+}
+
+func Expires(maxAge time.Duration, child http.Handler) http.Handler {
+	return expiresHandler{minCache: maxAge, maxLength: 0, child: child}
+}
+
+func ExpiresRange(min, max time.Duration, child http.Handler) http.Handler {
+	return expiresHandler{minCache: min, maxLength: max - min, child: child}
 }
