@@ -39,7 +39,7 @@ func ThumbCache(logger *log.Logger, targetWidth, targetHeight int, cacheSize int
 	return this
 }
 
-const Megabyte int = 2 << 20
+const Megabyte int = 1 << 20
 
 type thumbCache struct {
 	x        int
