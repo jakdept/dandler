@@ -18,53 +18,6 @@ func init() {
 	groupcache.NewHTTPPool("http://127.0.0.1:12345")
 }
 
-// func TestLoadThumbnail(t *testing.T) {
-// 	testData := []struct {
-// 		imageName string
-// 		size      int64
-// 	}{
-// 		{
-// 			imageName: "accidentally_save_file.gif",
-// 			size:      17861,
-// 		}, {
-// 			imageName: "blocked_us.png",
-// 			size:      44940,
-// 		}, {
-// 			imageName: "carlton_pls.jpg",
-// 			size:      22806,
-// 		}, {
-// 			imageName: "lemur_pudding_cups.jpg",
-// 			size:      72840,
-// 		}, {
-// 			imageName: "spooning_a_barret.png",
-// 			size:      47306,
-// 		}, {
-// 			imageName: "whats_in_the_case.gif",
-// 			size:      48763,
-// 		},
-// 	}
-
-// 	tempdir, err := ioutil.TempDir("", "sp9k1-")
-// 	if err != nil {
-// 		t.Fatalf("failed creating test directory: %s", err)
-// 	}
-
-// 	h := thumbnailHandler{x: 200, y: 200, raw: "testdata", thumbExt: "png", thumbs: tempdir}
-
-// 	for id, test := range testData {
-// 		h.loadThumbnail(test.imageName)
-// 		info, err := os.Stat(h.generateThumbPath(test.imageName))
-// 		if err != nil {
-// 			t.Logf("#%d - failed to stat thumbnail [%s] tempdir [%s]: %s",
-// 				id, test.imageName, tempdir, err)
-// 			t.Fail()
-// 			continue
-// 		}
-// 		assert.Equal(t, test.size, info.Size(),
-// 			"#%d [%s] - size does not match - tempDir [%s]", id, test.size, tempdir)
-// 	}
-// }
-
 func TestThumbCache(t *testing.T) {
 	var testData = []struct {
 		uri           string
@@ -111,7 +64,7 @@ func TestThumbCache(t *testing.T) {
 			contentType:   "image/png",
 		}, {
 			uri:           "/bad.target",
-			code:          500,
+			code:          404,
 			md5:           "",
 			contentLength: 0,
 			contentType:   "",
@@ -227,7 +180,7 @@ func TestThumbCache_JPG(t *testing.T) {
 			contentType:   "image/",
 		}, {
 			uri:           "/bad.target.png",
-			code:          500,
+			code:          404,
 			md5:           "",
 			contentLength: 0,
 			contentType:   "",

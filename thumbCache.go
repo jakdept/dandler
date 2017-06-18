@@ -9,6 +9,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 	"time"
 
 	_ "image/gif"  // imported to allow gif decoding natively
@@ -54,8 +55,14 @@ func (h thumbCache) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	data := new([]byte)
 	err := h.cache.Get(nil, r.URL.Path, groupcache.AllocatingByteSliceSink(data))
 	if err != nil {
+		if strings.HasPrefix(err.Error(), "could not open image") {
+			h.l.Println(err)
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
 		h.l.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 	http.ServeContent(w, r, r.URL.Path, time.Now(), bytes.NewReader(*data))
 }
@@ -73,12 +80,10 @@ func (h thumbCache) Get(ctx groupcache.Context, key string,
 func (h thumbCache) generateThumbnail(imageName string) ([]byte, error) {
 	rawImage, err := h.openImage(h.generateRawPath(imageName))
 	if err != nil {
-		log.Println(err)
 		return []byte{}, fmt.Errorf("could not open image [%s]: %s", imageName, err)
 	}
 	thumbImg, err := h.resizeImage(rawImage)
 	if err != nil {
-		log.Println(err)
 		return []byte{}, fmt.Errorf("cound not resize image [%s]: %v", imageName, err)
 	}
 	data, err := h.encodeImage(thumbImg)
