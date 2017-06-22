@@ -23,11 +23,13 @@ const (
 	ForceTemporary             // Use a 302 for the redirect
 )
 
-// CanocialHost returns a http.Handler that redirects to the canocial host
+// CanocialHostHandler returns a http.Handler that redirects to the canocial host
 // based on certain options. 0 may be passed for options if so desired, or provided
 // bits can be forced on the client with a redirect.
-func CanocialHost(host, port string, options int, childHandler http.Handler) http.Handler {
-	return canocialHostHandler{host: host, port: port, options: options, child: childHandler}
+func CanocialHostHandler(url string, options int, childHandler http.Handler) http.Handler {
+	h := canocialHostHandler{options: options, child: childHandler}
+	h.host, h.port = h.splitHostPort(url)
+	return h
 }
 
 func (h canocialHostHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -41,19 +43,21 @@ func (h canocialHostHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.child.ServeHTTP(w, r)
 }
 
+func (h canocialHostHandler) splitHostPort(url string) (string, string) {
+	if !strings.Contains(url, ":") {
+		return url, ""
+	}
+	parts := strings.SplitN(url, ":", 2)
+	return parts[0], parts[1]
+}
+
 func (h canocialHostHandler) checkHostAndPort(url string) bool {
-	if strings.Contains(url, ":") {
-		chunks := strings.SplitN(url, ":", 2)
-		if h.options&ForceHost != 0 && chunks[0] != h.host {
-			return true
-		}
-		if h.options&ForcePort != 0 && chunks[1] != h.port {
-			return true
-		}
-	} else {
-		if h.options&ForceHost != 0 && url != h.host {
-			return true
-		}
+	host, port := h.splitHostPort(url)
+	if h.options&ForceHost != 0 && host != h.host {
+		return true
+	}
+	if h.options&ForcePort != 0 && port != h.port {
+		return true
 	}
 	return false
 }
@@ -73,11 +77,17 @@ func (h canocialHostHandler) buildRedirect(r *http.Request) string {
 	// if host or port is forced, I have to modify the host header
 	var host, port, scheme string
 	if h.options&(ForceHost|ForcePort) != 0 {
-		if strings.Contains(r.Host, ":") {
-			chunks := strings.SplitN(r.Host, ":", 2)
-			host, port = chunks[0], chunks[1]
+		host, port := h.splitHostPort(url.String())
+		if h.options&ForceHost != 0 {
+			host = h.host
+		}
+		if h.options&ForcePort != 0 {
+			port = h.port
+		}
+		if port == "" {
+			url.Host = host
 		} else {
-			host = r.Host
+			url.Host = host + ":" + port
 		}
 	}
 
