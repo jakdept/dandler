@@ -76,21 +76,7 @@ func (h canonicalHostHandler) checkScheme(conn *tls.ConnectionState) bool {
 func (h canonicalHostHandler) buildRedirect(r *http.Request) string {
 	// if host or port is forced, I have to modify the host header
 	var host, port, scheme string
-	if h.options&(ForceHost|ForcePort) != 0 {
-		host, port := h.splitHostPort(url.String())
-		if h.options&ForceHost != 0 {
-			host = h.host
-		}
-		if h.options&ForcePort != 0 {
-			port = h.port
-		}
-		if port == "" {
-			url.Host = host
-		} else {
-			url.Host = host + ":" + port
-		}
-	}
-
+	host, port = h.splitHostPort(r.URL.Host)
 	if r.TLS == nil {
 		scheme = "http"
 	} else {

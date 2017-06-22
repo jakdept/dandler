@@ -87,7 +87,7 @@ func TestCanonicalHostHandler(t *testing.T) {
 		},
 	}
 
-	child := SuccessHandler("child")
+	child := Success("child")
 
 	for id, test := range testdata {
 		t.Run(fmt.Sprintf("canonical test %d", id), func(t *testing.T) {
