@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-type canocialHostHandler struct {
+type canonicalHostHandler struct {
 	host    string
 	port    string
 	options int
@@ -23,14 +23,16 @@ const (
 	ForceTemporary             // Use a 302 for the redirect
 )
 
-// CanocialHost returns a http.Handler that redirects to the canocial host
+// CanonicalHostHandler returns a http.Handler that redirects to the canocial host
 // based on certain options. 0 may be passed for options if so desired, or provided
 // bits can be forced on the client with a redirect.
-func CanocialHost(host, port string, options int, childHandler http.Handler) http.Handler {
-	return canocialHostHandler{host: host, port: port, options: options, child: childHandler}
+func CanonicalHostHandler(url string, options int, childHandler http.Handler) http.Handler {
+	h := canonicalHostHandler{options: options, child: childHandler}
+	h.host, h.port = h.splitHostPort(url)
+	return h
 }
 
-func (h canocialHostHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h canonicalHostHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if h.checkHostAndPort(r.Host) || h.checkScheme(r.TLS) {
 		if h.options&ForceTemporary != 0 {
 			http.Redirect(w, r, h.buildRedirect(r), http.StatusTemporaryRedirect)
@@ -41,24 +43,26 @@ func (h canocialHostHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.child.ServeHTTP(w, r)
 }
 
-func (h canocialHostHandler) checkHostAndPort(url string) bool {
-	if strings.Contains(url, ":") {
-		chunks := strings.SplitN(url, ":", 2)
-		if h.options&ForceHost != 0 && chunks[0] != h.host {
-			return true
-		}
-		if h.options&ForcePort != 0 && chunks[1] != h.port {
-			return true
-		}
-	} else {
-		if h.options&ForceHost != 0 && url != h.host {
-			return true
-		}
+func (h canonicalHostHandler) splitHostPort(url string) (string, string) {
+	if !strings.Contains(url, ":") {
+		return url, ""
+	}
+	parts := strings.SplitN(url, ":", 2)
+	return parts[0], parts[1]
+}
+
+func (h canonicalHostHandler) checkHostAndPort(url string) bool {
+	host, port := h.splitHostPort(url)
+	if h.options&ForceHost != 0 && host != h.host {
+		return true
+	}
+	if h.options&ForcePort != 0 && port != h.port {
+		return true
 	}
 	return false
 }
 
-func (h canocialHostHandler) checkScheme(conn *tls.ConnectionState) bool {
+func (h canonicalHostHandler) checkScheme(conn *tls.ConnectionState) bool {
 	switch {
 	case h.options&ForceHTTPS != 0 && conn == nil:
 		return true
@@ -69,18 +73,10 @@ func (h canocialHostHandler) checkScheme(conn *tls.ConnectionState) bool {
 	}
 }
 
-func (h canocialHostHandler) buildRedirect(r *http.Request) string {
+func (h canonicalHostHandler) buildRedirect(r *http.Request) string {
 	// if host or port is forced, I have to modify the host header
 	var host, port, scheme string
-	if h.options&(ForceHost|ForcePort) != 0 {
-		if strings.Contains(r.Host, ":") {
-			chunks := strings.SplitN(r.Host, ":", 2)
-			host, port = chunks[0], chunks[1]
-		} else {
-			host = r.Host
-		}
-	}
-
+	host, port = h.splitHostPort(r.URL.Host)
 	if r.TLS == nil {
 		scheme = "http"
 	} else {
