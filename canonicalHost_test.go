@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCanonicalHostHandler(t *testing.T) {
+func TestCanonicalHost(t *testing.T) {
 	testdata := []struct {
 		options        int
 		url            string
@@ -100,7 +100,7 @@ func TestCanonicalHostHandler(t *testing.T) {
 			}
 
 			// create the server for the parallel test
-			ts := httptest.NewServer(CanonicalHostHandler(test.url, test.options, child))
+			ts := httptest.NewServer(CanonicalHost(test.url, test.options, child))
 			resp, err := c.Get(ts.URL)
 			if !assert.NoError(t, err) {
 				log.Println(err)
