@@ -26,6 +26,20 @@ func TestRedirectURIHandler(t *testing.T) {
 			code:       301,
 			requestURI: "/test",
 			target:     "http://b.com/prefix/test",
+		}, {
+			tls:        false,
+			domain:     "anotherdomain.com",
+			prefixURI:  "",
+			code:       302,
+			requestURI: "/test",
+			target:     "http://anotherdomain.com/test",
+		}, {
+			tls:        true,
+			domain:     "secure.domain",
+			prefixURI:  "",
+			code:       302,
+			requestURI: "/idksomething",
+			target:     "https://secure.domain/idksomething",
 		},
 	}
 	for id, tt := range tests {
