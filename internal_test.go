@@ -20,8 +20,6 @@ import (
 )
 
 func TestInternal(t *testing.T) {
-	// todo: re-enable this test
-	// t.Skip("internal handler test skipped")
 	var testData = []struct {
 		uri           string
 		code          int
