@@ -1,7 +1,6 @@
 package dandler
 
 import (
-	"crypto/md5"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -11,8 +10,15 @@ import (
 	"os"
 	"testing"
 
+	"github.com/sebdah/goldie"
+
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
+
+func init() {
+	goldie.FixtureDir = "testdata/fixtures"
+}
 
 func TestLoadThumbnail(t *testing.T) {
 	testData := []struct {
@@ -63,77 +69,52 @@ func TestLoadThumbnail(t *testing.T) {
 
 func TestThumbnail(t *testing.T) {
 	var testData = []struct {
-		uri           string
-		code          int
-		md5           string
-		contentLength int64
-		contentType   string
+		uri         string
+		code        int
+		contentType string
 	}{
 		{
-			uri:           "/accidentally_save_file.gif.png",
-			code:          200,
-			md5:           "bc587c694204580315614011d6b702ce",
-			contentLength: 25162,
-			contentType:   "image/png",
+			uri:         "/accidentally_save_file.gif.png",
+			code:        200,
+			contentType: "image/png",
 		}, {
-			uri:           "/blocked_us.png.png",
-			code:          200,
-			md5:           "be0261c7ed6c869e3462f1688f040ab8",
-			contentLength: 66336,
-			contentType:   "image/png",
+			uri:         "/blocked_us.png.png",
+			code:        200,
+			contentType: "image/png",
 		}, {
-			uri:           "/carlton_pls.jpg.png",
-			code:          200,
-			md5:           "e2d15c65598dd54f0b72c118134344a3",
-			contentLength: 33345,
-			contentType:   "image/png",
+			uri:         "/carlton_pls.jpg.png",
+			code:        200,
+			contentType: "image/png",
 		}, {
-			uri:           "/lemur_pudding_cups.jpg.png",
-			code:          200,
-			md5:           "53070f5de5e3d2e44e6b4af461fad761",
-			contentLength: 125386,
-			contentType:   "image/png",
+			uri:         "/lemur_pudding_cups.jpg.png",
+			code:        200,
+			contentType: "image/png",
 		}, {
-			uri:           "/spooning_a_barret.png.png",
-			code:          200,
-			md5:           "2f53597728f846ceb39f88bf27f44d4f",
-			contentLength: 71299,
-			contentType:   "image/png",
+			uri:         "/spooning_a_barret.png.png",
+			code:        200,
+			contentType: "image/png",
 		}, {
-			uri:           "/whats_in_the_case.gif.png",
-			code:          200,
-			md5:           "1990381bd41ea22983e1a806d3381afa",
-			contentLength: 96063,
-			contentType:   "image/png",
+			uri:         "/whats_in_the_case.gif.png",
+			code:        200,
+			contentType: "image/png",
 		}, {
-			uri:           "/bad.target.png",
-			code:          404,
-			md5:           "",
-			contentLength: 0,
-			contentType:   "",
+			uri:         "/bad.target.png",
+			code:        404,
+			contentType: "",
 		}, {
-			uri:           "/accidentally_save_file.gif.png",
-			code:          200,
-			md5:           "bc587c694204580315614011d6b702ce",
-			contentLength: 25162,
-			contentType:   "image/png",
+			uri:         "/accidentally_save_file.gif.png",
+			code:        200,
+			contentType: "image/png",
 		}, {
-			uri:           "/blocked_us.png.png",
-			code:          200,
-			md5:           "be0261c7ed6c869e3462f1688f040ab8",
-			contentLength: 66336,
-			contentType:   "image/png",
+			uri:         "/blocked_us.png.png",
+			code:        200,
+			contentType: "image/png",
 		}, {
-			uri:           "/carlton_pls.jpg.png",
-			code:          200,
-			md5:           "e2d15c65598dd54f0b72c118134344a3",
-			contentLength: 33345,
-			contentType:   "image/png",
+			uri:         "/carlton_pls.jpg.png",
+			code:        200,
+			contentType: "image/png",
 		},
 	}
-
-	// disabling problematic tests
-	t.SkipNow()
 
 	tempdir, err := ioutil.TempDir("", "sp9k1-")
 	if err != nil {
@@ -150,7 +131,7 @@ func TestThumbnail(t *testing.T) {
 	}
 
 	for testID, test := range testData {
-		t.Run(fmt.Sprintf("TestThumbnail-#%d[%s][tempdir:%s]", testID, test.uri, tempdir), func(t *testing.T) {
+		t.Run(fmt.Sprintf("TestThumbnail-%d", testID), func(t *testing.T) {
 			uri, err := url.Parse(test.uri)
 			if err != nil {
 				t.Errorf("bad URI path: [%s]", test.uri)
@@ -170,16 +151,12 @@ func TestThumbnail(t *testing.T) {
 				}
 				return
 			}
-			assert.Equal(t, test.contentLength, res.ContentLength, "ContentLength does not match: ")
 			assert.Equal(t, test.contentType, res.Header.Get("Content-Type"), "Content-Type does not match: ")
 
 			body, err := ioutil.ReadAll(res.Body)
 			res.Body.Close()
-			if err != nil {
-				t.Error(err)
-				return
-			}
-			assert.Equal(t, test.md5, fmt.Sprintf("%x", md5.Sum(body)), "mismatched body returned: ")
+			require.NoError(t, err)
+			goldie.Assert(t, t.Name(), body)
 		})
 	}
 }
@@ -255,9 +232,6 @@ func TestThumbnailJPG(t *testing.T) {
 		},
 	}
 
-	// skipping a bad test
-	t.SkipNow()
-
 	for _, ext := range []string{"jpg", "jpeg"} {
 		tempdir, err := ioutil.TempDir("", "sp9k1-")
 		if err != nil {
@@ -274,7 +248,7 @@ func TestThumbnailJPG(t *testing.T) {
 		}
 
 		for testID, test := range testData {
-			t.Run(fmt.Sprintf("TestThumbnail[%s]-#%d-[%s]-[tempdir:%s]", ext, testID, test.uri, tempdir), func(t *testing.T) {
+			t.Run(fmt.Sprintf("TestThumbnail-%s-%d-", ext, testID), func(t *testing.T) {
 				uri, err := url.Parse(test.uri + "." + ext)
 				if err != nil {
 					t.Errorf("bad URI path: [%s]", test.uri)
@@ -294,16 +268,12 @@ func TestThumbnailJPG(t *testing.T) {
 					}
 					return
 				}
-				assert.Equal(t, test.contentLength, res.ContentLength, "ContentLength does not match: ")
 				assert.Equal(t, test.contentType+ext, res.Header.Get("Content-Type"), "Content-Type does not match: ")
 
 				body, err := ioutil.ReadAll(res.Body)
 				res.Body.Close()
-				if err != nil {
-					t.Error(err)
-					return
-				}
-				assert.Equal(t, test.md5, fmt.Sprintf("%x", md5.Sum(body)), "mismatched body returned: ")
+				require.NoError(t, err)
+				goldie.Assert(t, t.Name(), body)
 			})
 		}
 	}

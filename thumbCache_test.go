@@ -1,7 +1,6 @@
 package dandler
 
 import (
-	"crypto/md5"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -11,7 +10,9 @@ import (
 	"testing"
 
 	"github.com/golang/groupcache"
+	"github.com/sebdah/goldie"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func init() {
@@ -20,77 +21,52 @@ func init() {
 
 func TestThumbCache(t *testing.T) {
 	var testData = []struct {
-		uri           string
-		code          int
-		md5           string
-		contentLength int64
-		contentType   string
+		uri         string
+		code        int
+		contentType string
 	}{
 		{
-			uri:           "/accidentally_save_file.gif",
-			code:          200,
-			md5:           "bc587c694204580315614011d6b702ce",
-			contentLength: 25162,
-			contentType:   "image/png",
+			uri:         "/accidentally_save_file.gif",
+			code:        200,
+			contentType: "image/png",
 		}, {
-			uri:           "/blocked_us.png",
-			code:          200,
-			md5:           "be0261c7ed6c869e3462f1688f040ab8",
-			contentLength: 66336,
-			contentType:   "image/png",
+			uri:         "/blocked_us.png",
+			code:        200,
+			contentType: "image/png",
 		}, {
-			uri:           "/carlton_pls.jpg",
-			code:          200,
-			md5:           "e2d15c65598dd54f0b72c118134344a3",
-			contentLength: 33345,
-			contentType:   "image/png",
+			uri:         "/carlton_pls.jpg",
+			code:        200,
+			contentType: "image/png",
 		}, {
-			uri:           "/lemur_pudding_cups.jpg",
-			code:          200,
-			md5:           "53070f5de5e3d2e44e6b4af461fad761",
-			contentLength: 125386,
-			contentType:   "image/png",
+			uri:         "/lemur_pudding_cups.jpg",
+			code:        200,
+			contentType: "image/png",
 		}, {
-			uri:           "/spooning_a_barret.png",
-			code:          200,
-			md5:           "2f53597728f846ceb39f88bf27f44d4f",
-			contentLength: 71299,
-			contentType:   "image/png",
+			uri:         "/spooning_a_barret.png",
+			code:        200,
+			contentType: "image/png",
 		}, {
-			uri:           "/whats_in_the_case.gif",
-			code:          200,
-			md5:           "1990381bd41ea22983e1a806d3381afa",
-			contentLength: 96063,
-			contentType:   "image/png",
+			uri:         "/whats_in_the_case.gif",
+			code:        200,
+			contentType: "image/png",
 		}, {
-			uri:           "/bad.target",
-			code:          404,
-			md5:           "",
-			contentLength: 0,
-			contentType:   "",
+			uri:         "/bad.target",
+			code:        404,
+			contentType: "",
 		}, {
-			uri:           "/accidentally_save_file.gif",
-			code:          200,
-			md5:           "bc587c694204580315614011d6b702ce",
-			contentLength: 25162,
-			contentType:   "image/png",
+			uri:         "/accidentally_save_file.gif",
+			code:        200,
+			contentType: "image/png",
 		}, {
-			uri:           "/blocked_us.png",
-			code:          200,
-			md5:           "be0261c7ed6c869e3462f1688f040ab8",
-			contentLength: 66336,
-			contentType:   "image/png",
+			uri:         "/blocked_us.png",
+			code:        200,
+			contentType: "image/png",
 		}, {
-			uri:           "/carlton_pls.jpg",
-			code:          200,
-			md5:           "e2d15c65598dd54f0b72c118134344a3",
-			contentLength: 33345,
-			contentType:   "image/png",
+			uri:         "/carlton_pls.jpg",
+			code:        200,
+			contentType: "image/png",
 		},
 	}
-
-	// disabling problematic tests
-	t.SkipNow()
 
 	logger := log.New(ioutil.Discard, "", 0)
 	// logger := log.New(os.Stderr, "", 0)
@@ -103,7 +79,7 @@ func TestThumbCache(t *testing.T) {
 	}
 
 	for testID, test := range testData {
-		t.Run(fmt.Sprintf("TestThumbCache-#%d[%s]", testID, test.uri), func(t *testing.T) {
+		t.Run(fmt.Sprintf("TestThumbCache-%d", testID), func(t *testing.T) {
 			uri, err := url.Parse(test.uri)
 			if err != nil {
 				t.Errorf("bad URI path: [%s]", test.uri)
@@ -123,93 +99,64 @@ func TestThumbCache(t *testing.T) {
 				}
 				return
 			}
-			assert.Equal(t, test.contentLength, res.ContentLength, "ContentLength does not match: ")
 			assert.Equal(t, test.contentType, res.Header.Get("Content-Type"), "Content-Type does not match: ")
 
 			body, err := ioutil.ReadAll(res.Body)
 			res.Body.Close()
-			if err != nil {
-				t.Error(err)
-				return
-			}
-			assert.Equal(t, test.md5, fmt.Sprintf("%x", md5.Sum(body)), "mismatched body returned: ")
+			require.NoError(t, err)
+			goldie.Assert(t, t.Name(), body)
 		})
 	}
 }
 
 func TestThumbCache_JPG(t *testing.T) {
 	var testData = []struct {
-		uri           string
-		code          int
-		md5           string
-		contentLength int64
-		contentType   string
+		uri         string
+		code        int
+		contentType string
 	}{
 		{
-			uri:           "/accidentally_save_file.gif",
-			code:          200,
-			md5:           "2aa9ba78ec27dc96a3f5603e9e8eb646",
-			contentLength: 12489,
-			contentType:   "image/",
+			uri:         "/accidentally_save_file.gif",
+			code:        200,
+			contentType: "image/",
 		}, {
-			uri:           "/blocked_us.png",
-			code:          200,
-			md5:           "2fc5189bea70182964bf9126bcb3f0be",
-			contentLength: 10887,
-			contentType:   "image/",
+			uri:         "/blocked_us.png",
+			code:        200,
+			contentType: "image/",
 		}, {
-			uri:           "/carlton_pls.jpg",
-			code:          200,
-			md5:           "950e11dcdbbe9e27781aed1e815ff83f",
-			contentLength: 5081,
-			contentType:   "image/",
+			uri:         "/carlton_pls.jpg",
+			code:        200,
+			contentType: "image/",
 		}, {
-			uri:           "/lemur_pudding_cups.jpg",
-			code:          200,
-			md5:           "b5a688f25e0c248a6b101467957fc989",
-			contentLength: 17019,
-			contentType:   "image/",
+			uri:         "/lemur_pudding_cups.jpg",
+			code:        200,
+			contentType: "image/",
 		}, {
-			uri:           "/spooning_a_barret.png",
-			code:          200,
-			md5:           "b62b31ec6cfc5fd85dec71a3592373a8",
-			contentLength: 10705,
-			contentType:   "image/",
+			uri:         "/spooning_a_barret.png",
+			code:        200,
+			contentType: "image/",
 		}, {
-			uri:           "/whats_in_the_case.gif",
-			code:          200,
-			md5:           "806a2539113d46547dbc0fe779e5c4f3",
-			contentLength: 7574,
-			contentType:   "image/",
+			uri:         "/whats_in_the_case.gif",
+			code:        200,
+			contentType: "image/",
 		}, {
-			uri:           "/bad.target.png",
-			code:          404,
-			md5:           "",
-			contentLength: 0,
-			contentType:   "",
+			uri:         "/bad.target.png",
+			code:        404,
+			contentType: "",
 		}, {
-			uri:           "/accidentally_save_file.gif",
-			code:          200,
-			md5:           "2aa9ba78ec27dc96a3f5603e9e8eb646",
-			contentLength: 12489,
-			contentType:   "image/",
+			uri:         "/accidentally_save_file.gif",
+			code:        200,
+			contentType: "image/",
 		}, {
-			uri:           "/blocked_us.png",
-			code:          200,
-			md5:           "2fc5189bea70182964bf9126bcb3f0be",
-			contentLength: 10887,
-			contentType:   "image/",
+			uri:         "/blocked_us.png",
+			code:        200,
+			contentType: "image/",
 		}, {
-			uri:           "/carlton_pls.jpg",
-			code:          200,
-			md5:           "950e11dcdbbe9e27781aed1e815ff83f",
-			contentLength: 5081,
-			contentType:   "image/",
+			uri:         "/carlton_pls.jpg",
+			code:        200,
+			contentType: "image/",
 		},
 	}
-
-	// disabling a bad test
-	t.SkipNow()
 
 	for _, ext := range []string{"jpg", "jpeg"} {
 		logger := log.New(ioutil.Discard, "", 0)
@@ -223,7 +170,7 @@ func TestThumbCache_JPG(t *testing.T) {
 		}
 
 		for testID, test := range testData {
-			t.Run(fmt.Sprintf("TestThumbCache[%s]-#%d-[%s]", ext, testID, test.uri), func(t *testing.T) {
+			t.Run(fmt.Sprintf("TestThumbCache-%s-%d", ext, testID), func(t *testing.T) {
 				uri, err := url.Parse(test.uri)
 				if err != nil {
 					t.Errorf("bad URI path: [%s]", test.uri)
@@ -243,16 +190,12 @@ func TestThumbCache_JPG(t *testing.T) {
 					}
 					return
 				}
-				assert.Equal(t, test.contentLength, res.ContentLength, "ContentLength does not match: ")
 				assert.Equal(t, test.contentType+ext, res.Header.Get("Content-Type"), "Content-Type does not match: ")
 
 				body, err := ioutil.ReadAll(res.Body)
 				res.Body.Close()
-				if err != nil {
-					t.Error(err)
-					return
-				}
-				assert.Equal(t, test.md5, fmt.Sprintf("%x", md5.Sum(body)), "mismatched body returned: ")
+				require.NoError(t, err)
+				goldie.Assert(t, t.Name(), body)
 			})
 		}
 	}
