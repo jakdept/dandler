@@ -1,5 +1,3 @@
-//go:generate statik -src=./testdata
-
 package dandler
 
 import (
