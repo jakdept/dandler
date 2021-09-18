@@ -46,13 +46,13 @@ func TestInternal(t *testing.T) {
 			code:          200,
 			md5:           "c1b9a03d47a42720891989a5844e9e3c",
 			contentLength: 14173,
-			contentType:   "application/javascript",
+			contentType:   "text/javascript",
 		}, {
 			uri:           "testdata/modernizr.custom.js",
 			code:          200,
 			md5:           "3d025169b583ce5c3af13060440e2277",
 			contentLength: 8281,
-			contentType:   "application/javascript",
+			contentType:   "text/javascript",
 		}, {
 			uri:           "testdata/page.html",
 			code:          200,
