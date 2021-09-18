@@ -8,8 +8,7 @@ import (
 )
 
 // Internal serves a static, in memory filesystem. The filesystem to be
-// served should have been generated with github.com/rakyll/statik. It should
-// also be imported directly into the current package.
+// served should have been generated with embed or similar..
 //
 // Note - this is likely a duplicate of http.FileServer. It will likely be removed.
 func Internal(logger *log.Logger, fs http.FileSystem) http.Handler {

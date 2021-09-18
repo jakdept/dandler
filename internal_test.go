@@ -97,13 +97,6 @@ func TestInternal(t *testing.T) {
 				return
 			}
 
-			assert.Equal(t, test.code, res.StatusCode, "status code does not match")
-			if test.code != 200 {
-				if res.StatusCode != test.code {
-					t.Logf("the response returned: \n%#v\n", res)
-				}
-				return
-			}
 			assert.Equal(t, test.contentLength, res.ContentLength, "ContentLength does not match")
 			assert.Equal(t, test.contentType, res.Header.Get("Content-Type"), "Content-Type does not match")
 
